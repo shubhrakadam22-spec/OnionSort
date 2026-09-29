@@ -1,0 +1,586 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OnionSort | Smart Agriculture</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans+Gujarati:wght@400;600;700&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Sans+Telugu:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+--primary:#7c3aed;--dark:#5b21b6;--accent:#c026d3;
+--light:#f3edff;--bg:#faf7ff;--text:#2e1f4d;
+--muted:#7a6f95;--border:#e9e0fa;--green:#16a34a;
+--red:#e11d48;--shadow:0 8px 28px rgba(124,58,237,.10);
+--grad:linear-gradient(135deg,#7c3aed,#c026d3);
+--font:"Poppins","Segoe UI",Arial,sans-serif;
+}
+html[lang="hi"],html[lang="mr"]{--font:"Noto Sans Devanagari","Poppins",sans-serif}
+html[lang="gu"]{--font:"Noto Sans Gujarati","Poppins",sans-serif}
+html[lang="ta"]{--font:"Noto Sans Tamil","Poppins",sans-serif}
+html[lang="te"]{--font:"Noto Sans Telugu","Poppins",sans-serif}
+
+*{margin:0;padding:0;box-sizing:border-box;font-family:var(--font)}
+body{background:radial-gradient(circle at top right,#efe4ff 0,var(--bg) 45%);color:var(--text);min-height:100vh}
+button,input,select{font:inherit}
+button{cursor:pointer;border:none}
+.app{display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{width:260px;background:rgba(255,255,255,.9);backdrop-filter:blur(12px);border-right:1px solid var(--border);padding:24px 15px;position:fixed;inset:0 auto 0 0;overflow-y:auto;z-index:10}
+.logo{display:flex;align-items:center;gap:12px;padding:0 12px 28px}
+.logo-icon{background:var(--grad);color:#fff;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-size:23px;box-shadow:0 6px 16px rgba(124,58,237,.35)}
+.logo h2{color:var(--dark);font-size:21px}
+.logo small{color:var(--muted);font-size:11px}
+.menu-title{color:#b3a6d1;font-size:11px;font-weight:700;letter-spacing:1.5px;padding:12px 14px}
+.nav-row{position:relative}
+.nav-item{width:100%;display:flex;align-items:center;gap:13px;padding:13px 15px;margin-bottom:6px;border-radius:12px;color:#5d5078;background:transparent;text-align:left;font-size:14px;transition:.25s}
+.nav-item:hover{background:var(--light);color:var(--primary);transform:translateX(3px)}
+.nav-item.active{background:var(--grad);color:#fff;font-weight:600;box-shadow:0 6px 16px rgba(124,58,237,.3)}
+.nav-icon{font-size:19px;width:22px;text-align:center}
+.camera-shortcut{position:absolute;right:10px;top:9px;background:#fff;color:var(--primary);border-radius:8px;padding:5px 8px;font-size:14px;box-shadow:0 2px 8px rgba(124,58,237,.2);z-index:2}
+.main{margin-left:260px;padding:26px 34px 50px;width:calc(100% - 260px)}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px}
+.topbar h2{font-size:24px;color:var(--dark)}
+.topbar-right{display:flex;align-items:center;gap:14px}
+.status{background:#ecfdf3;color:var(--green);padding:8px 14px;border-radius:20px;font-size:12px;font-weight:600}
+.avatar{width:40px;height:40px;border-radius:50%;background:var(--grad);color:#fff;display:grid;place-items:center;font-weight:700}
+.page{display:none}
+.page.active{display:block;animation:fade .4s ease}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.welcome{background:var(--grad);color:#fff;padding:32px;border-radius:20px;margin-bottom:24px;box-shadow:0 14px 34px rgba(124,58,237,.3);position:relative;overflow:hidden}
+.welcome::after{content:"🧅";position:absolute;right:28px;top:50%;transform:translateY(-50%);font-size:90px;opacity:.18}
+.welcome h1{font-size:26px;margin-bottom:8px}
+.welcome p{opacity:.92;line-height:1.6;max-width:600px}
+.section-heading{margin:26px 0 15px;font-size:19px;color:var(--dark)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.card{background:#fff;padding:24px;border-radius:18px;border:1px solid var(--border);box-shadow:var(--shadow);transition:.25s}
+.grid .card:hover{transform:translateY(-5px);box-shadow:0 14px 34px rgba(124,58,237,.18)}
+.card h3{font-size:15px;margin-bottom:12px}
+.stat{font-size:30px;font-weight:700;color:var(--primary)}
+.muted{color:var(--muted);font-size:13px;margin-top:7px;line-height:1.6}
+.card-icon{font-size:24px;width:48px;height:48px;display:grid;place-items:center;background:var(--light);border-radius:14px;margin-bottom:14px}
+.btn{background:var(--grad);color:#fff;border-radius:12px;padding:11px 18px;font-weight:600;font-size:13px;transition:.25s;box-shadow:0 4px 14px rgba(124,58,237,.3)}
+.btn:hover{transform:translateY(-2px)}
+.btn.secondary{background:var(--light);color:var(--primary);box-shadow:none}
+.btn.danger{background:#ffe9ee;color:var(--red);box-shadow:none}
+.btn-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:15px}
+input,select{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:12px;background:#fdfbff;color:var(--text);outline:none}
+input:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(124,58,237,.12)}
+label{display:block;font-size:13px;font-weight:600;margin:15px 0 7px}
+.preview{width:100%;max-height:300px;object-fit:contain;border-radius:14px;background:var(--light);margin-top:15px;display:none}
+.vc-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.voice-card{text-align:center}
+.voice-circle{width:96px;height:96px;border-radius:50%;margin:24px auto;background:var(--light);color:var(--primary);display:grid;place-items:center;font-size:38px;border:8px solid #f8f3ff}
+.voice-circle.listening{background:var(--grad);color:#fff;animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(192,38,211,.5)}50%{transform:scale(1.06);box-shadow:0 0 0 18px rgba(192,38,211,0)}}
+.voice-output{background:var(--bg);border:1px dashed #d6c7f5;border-radius:12px;padding:15px;min-height:80px;text-align:left;font-size:13px;line-height:1.6;margin-top:18px;white-space:pre-wrap}
+.voice-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:15px}
+.voice-actions .btn{min-width:145px}
+.camera-screen{width:100%;height:250px;background:linear-gradient(160deg,#2a1650,#1a0e33);border-radius:14px;display:grid;place-items:center;overflow:hidden;margin-top:15px}
+.camera-screen video{width:100%;height:100%;object-fit:cover;display:none}
+.camera-placeholder{text-align:center;color:#cdbdf0}
+.camera-placeholder div{font-size:42px;margin-bottom:10px}
+.result-box{background:var(--light);border-left:4px solid var(--primary);border-radius:10px;padding:16px;margin-top:15px;line-height:1.8;font-size:14px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th,td{padding:14px;text-align:left;border-bottom:1px solid var(--border);font-size:13px}
+th{background:var(--light);color:var(--dark)}
+tr:hover td{background:#fbf8ff}
+.alert{background:#fff;border:1px solid var(--border);border-left:4px solid var(--accent);padding:18px;border-radius:14px;margin-bottom:13px;box-shadow:var(--shadow)}
+.alert strong{display:block;margin-bottom:6px}
+
+@media(max-width:1100px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:800px){
+.sidebar{width:74px;padding:20px 8px}
+.logo{justify-content:center;padding:0 0 25px}
+.logo-text,.menu-title,.nav-text{display:none}
+.nav-item{justify-content:center;padding:14px 5px}
+.camera-shortcut{right:-2px;top:-4px;padding:2px 5px;font-size:11px}
+.main{margin-left:74px;width:calc(100% - 74px);padding:20px}
+.vc-grid{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+.grid{grid-template-columns:1fr}
+.main{padding:14px}
+.topbar h2{font-size:18px}
+.status{display:none}
+.welcome h1{font-size:21px}
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<aside class="sidebar">
+<div class="logo">
+<div class="logo-icon">🧅</div>
+<div class="logo-text"><h2>OnionSort</h2><small>Smart Agriculture</small></div>
+</div>
+
+<div class="menu-title" data-i18n="menu">MAIN MENU</div>
+
+<button class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')"><span class="nav-icon">▦</span><span class="nav-text" data-i18n="dashboard">Dashboard</span></button>
+<button class="nav-item" data-page="grading" onclick="showPage('grading')"><span class="nav-icon">🧅</span><span class="nav-text" data-i18n="grading">Onion Grading</span></button>
+
+<div class="nav-row">
+<button class="nav-item" data-page="voice" onclick="showPage('voice')"><span class="nav-icon">🎙️</span><span class="nav-text" data-i18n="voice">Ask AgriVoice</span></button>
+<button class="camera-shortcut" onclick="openCameraPage(event)" title="Live Camera">📷</button>
+</div>
+
+<button class="nav-item" data-page="alerts" onclick="showPage('alerts')"><span class="nav-icon">🔔</span><span class="nav-text" data-i18n="alerts">Alerts & Advisory</span></button>
+<button class="nav-item" data-page="weather" onclick="showPage('weather')"><span class="nav-icon">☀️</span><span class="nav-text" data-i18n="weather">Weather Center</span></button>
+<button class="nav-item" data-page="history" onclick="showPage('history')"><span class="nav-icon">📋</span><span class="nav-text" data-i18n="history">Crop History</span></button>
+<button class="nav-item" data-page="sensors" onclick="showPage('sensors')"><span class="nav-icon">📡</span><span class="nav-text" data-i18n="sensors">Sensor Dashboard</span></button>
+
+<div class="menu-title" data-i18n="account">ACCOUNT</div>
+<button class="nav-item" data-page="settings" onclick="showPage('settings')"><span class="nav-icon">⚙️</span><span class="nav-text" data-i18n="settings">Settings</span></button>
+</aside>
+
+<main class="main">
+<div class="topbar">
+<h2 id="pageTitle">Dashboard</h2>
+<div class="topbar-right">
+<span class="status">● <span data-i18n="online">AI Online</span></span>
+<div class="avatar">S</div>
+</div>
+</div>
+
+<!-- DASHBOARD -->
+<section class="page active" id="dashboard">
+<div class="welcome">
+<h1 data-i18n="welcome">Welcome to OnionSort 👋</h1>
+<p data-i18n="welcomeText">Your smart companion for onion grading, crop monitoring and farming assistance.</p>
+</div>
+
+<h3 class="section-heading" data-i18n="overview">Farm Overview</h3>
+<div class="grid">
+<div class="card"><div class="card-icon">🧅</div><h3 data-i18n="graded">Onions Graded</h3><div class="stat" id="gradedCount">24</div><p class="muted" data-i18n="gradedDesc">Sample grading records</p></div>
+<div class="card"><div class="card-icon">🌱</div><h3 data-i18n="cropHealth">Crop Health</h3><div class="stat" data-i18n="good">Good</div><p class="muted" data-i18n="cropHealthDesc">Sample crop status</p></div>
+<div class="card"><div class="card-icon">🌤️</div><h3 data-i18n="temperature">Temperature</h3><div class="stat">29°C</div><p class="muted" data-i18n="temperatureDesc">Demo weather reading</p></div>
+</div>
+
+<h3 class="section-heading" data-i18n="quickActions">Quick Actions</h3>
+<div class="grid">
+<div class="card"><h3>🧅 <span data-i18n="gradeOnions">Grade Onions</span></h3><p class="muted" data-i18n="gradeDesc">Upload an onion image to view a sample grading result.</p><div class="btn-row"><button class="btn" onclick="showPage('grading')" data-i18n="startGrading">Start Grading</button></div></div>
+<div class="card"><h3>🎙️ <span data-i18n="talkAgriVoice">Talk to AgriVoice</span></h3><p class="muted" data-i18n="talkDesc">Ask farming questions using your voice.</p><div class="btn-row"><button class="btn" onclick="showPage('voice')" data-i18n="openVoice">Open AgriVoice</button></div></div>
+<div class="card"><h3>📷 <span data-i18n="liveCamera">Live Camera</span></h3><p class="muted" data-i18n="cameraDesc">Open your camera to capture an image.</p><div class="btn-row"><button class="btn" onclick="openCameraPage()" data-i18n="openCamera">Open Camera</button></div></div>
+</div>
+</section>
+
+<!-- GRADING -->
+<section class="page" id="grading">
+<div class="card">
+<h3>🧅 <span data-i18n="onionGrading">Onion Grading</span></h3>
+<p class="muted" data-i18n="uploadText">Upload an onion image to view a sample grading report.</p>
+<label data-i18n="selectImage">Select Image</label>
+<input type="file" id="onionUpload" accept="image/*" onchange="previewOnion(this)">
+<img id="onionPreview" class="preview" alt="Onion preview">
+<div class="btn-row"><button class="btn" onclick="gradeOnion()" data-i18n="analyze">Analyze Image</button></div>
+<div id="gradingResult" class="result-box" style="display:none"></div>
+</div>
+</section>
+
+<!-- VOICE AND CAMERA -->
+<section class="page" id="voice">
+<div class="vc-grid">
+
+<div class="card voice-card">
+<h3>🎙️ <span data-i18n="askAgriVoice">Ask AgriVoice</span></h3>
+<p class="muted" data-i18n="voiceInstructions">Speak in your preferred language to ask a farming question.</p>
+
+<label data-i18n="chooseLanguage">Choose Language</label>
+<select id="voiceLanguage" onchange="applyLanguage(this.value)">
+<option value="en-IN">English</option>
+<option value="hi-IN">हिन्दी</option>
+<option value="mr-IN">मराठी</option>
+<option value="gu-IN">ગુજરાતી</option>
+<option value="ta-IN">தமிழ்</option>
+<option value="te-IN">తెలుగు</option>
+</select>
+
+<div class="voice-circle" id="voiceCircle">🎙️</div>
+
+<!-- SPEAK AND CAMERA BUTTONS SIDE BY SIDE -->
+<div class="voice-actions">
+<button class="btn" id="startVoice" onclick="startListening()" data-i18n="tapSpeak">Tap to Speak</button>
+<button class="btn secondary" onclick="openCameraPage()" data-i18n="liveCamera">📷 Live Camera</button>
+</div>
+
+<div class="voice-output" id="voiceOutput" data-i18n="voiceOutput">Your voice input will appear here.</div>
+
+<div class="btn-row" style="justify-content:center">
+<button class="btn secondary" onclick="speakResponse()" data-i18n="speakResponse">🔊 Speak Response</button>
+<button class="btn secondary" onclick="clearVoice()" data-i18n="clear">Clear</button>
+</div>
+</div>
+
+<div class="card" id="cameraPanel">
+<h3>📷 <span data-i18n="liveCamera">Live Camera</span></h3>
+<p class="muted" data-i18n="cameraInstructions">Start your camera to capture an image of your crop.</p>
+
+<div class="camera-screen">
+<div class="camera-placeholder" id="cameraPlaceholder"><div>📷</div><span data-i18n="cameraReady">Camera is ready</span></div>
+<video id="cameraVideo" autoplay playsinline muted></video>
+</div>
+
+<div class="btn-row">
+<button class="btn" onclick="startCamera()" data-i18n="startCamera">Start Camera</button>
+<button class="btn danger" onclick="stopCamera()" data-i18n="stopCamera">Stop Camera</button>
+<button class="btn secondary" onclick="captureImage()" data-i18n="capture">Capture Image</button>
+</div>
+
+<canvas id="cameraCanvas" style="display:none"></canvas>
+<img id="capturedImage" class="preview" alt="Captured crop image">
+<p class="muted" id="cameraMessage"></p>
+</div>
+</div>
+</section>
+
+<!-- ALERTS -->
+<section class="page" id="alerts">
+<h3 class="section-heading" data-i18n="alertsAdvisory">Alerts & Advisory</h3>
+<div class="alert"><strong>🌧️ <span data-i18n="rainAlert">Rainfall Advisory</span></strong><p class="muted" data-i18n="rainText">Sample advisory: Monitor field drainage during periods of heavy rainfall.</p></div>
+<div class="alert"><strong>🌱 <span data-i18n="cropAlert">Crop Monitoring</span></strong><p class="muted" data-i18n="cropText">Check onion leaves regularly for visible signs of disease or pest activity.</p></div>
+<div class="alert"><strong>💧 <span data-i18n="waterAlert">Irrigation Reminder</span></strong><p class="muted" data-i18n="waterText">Check soil moisture before scheduling irrigation.</p></div>
+</section>
+
+<!-- WEATHER -->
+<section class="page" id="weather">
+<h3 class="section-heading" data-i18n="weatherCenter">Weather Center</h3>
+<div class="grid">
+<div class="card"><div class="card-icon">🌡️</div><h3 data-i18n="temperature">Temperature</h3><div class="stat">29°C</div><p class="muted" data-i18n="demoReading">Demo reading</p></div>
+<div class="card"><div class="card-icon">💧</div><h3 data-i18n="humidity">Humidity</h3><div class="stat">68%</div><p class="muted" data-i18n="demoReading">Demo reading</p></div>
+<div class="card"><div class="card-icon">🌧️</div><h3 data-i18n="rainfall">Rainfall</h3><div class="stat">12 mm</div><p class="muted" data-i18n="demoReading">Demo reading</p></div>
+</div>
+<p class="muted" style="margin-top:18px" data-i18n="weatherNote">These values are sample data. Connect a weather API for live information.</p>
+</section>
+
+<!-- HISTORY -->
+<section class="page" id="history">
+<h3 class="section-heading" data-i18n="cropHistory">Crop History</h3>
+<div class="card table-wrap">
+<table>
+<thead><tr><th data-i18n="date">Date</th><th data-i18n="crop">Crop</th><th data-i18n="grade">Grade</th><th data-i18n="status">Status</th></tr></thead>
+<tbody>
+<tr><td>29 Sep 2026</td><td>Onion</td><td>A</td><td data-i18n="sample">Sample</td></tr>
+<tr><td>28 Sep 2026</td><td>Onion</td><td>B</td><td data-i18n="sample">Sample</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<!-- SENSORS -->
+<section class="page" id="sensors">
+<h3 class="section-heading" data-i18n="sensorDashboard">Sensor Dashboard</h3>
+<div class="grid">
+<div class="card"><div class="card-icon">🌡️</div><h3 data-i18n="soilTemperature">Soil Temperature</h3><div class="stat">26°C</div><p class="muted" data-i18n="sampleSensor">Sample sensor reading</p></div>
+<div class="card"><div class="card-icon">💧</div><h3 data-i18n="soilMoisture">Soil Moisture</h3><div class="stat">42%</div><p class="muted" data-i18n="sampleSensor">Sample sensor reading</p></div>
+<div class="card"><div class="card-icon">📡</div><h3 data-i18n="sensorStatus">Sensor Status</h3><div class="stat" style="font-size:22px" data-i18n="demo">Demo</div><p class="muted" data-i18n="sensorNote">Connect IoT devices for live readings.</p></div>
+</div>
+</section>
+
+<!-- SETTINGS -->
+<section class="page" id="settings">
+<div class="card">
+<h3>⚙️ <span data-i18n="settings">Settings</span></h3>
+<label data-i18n="profileName">Profile Name</label>
+<input type="text" id="profileName" value="Farmer">
+<label data-i18n="preferredLanguage">Preferred Language</label>
+<select id="settingsLanguage" onchange="applyLanguage(this.value)">
+<option value="en-IN">English</option>
+<option value="hi-IN">हिन्दी</option>
+<option value="mr-IN">मराठी</option>
+<option value="gu-IN">ગુજરાતી</option>
+<option value="ta-IN">தமிழ்</option>
+<option value="te-IN">తెలుగు</option>
+</select>
+<div class="btn-row"><button class="btn" onclick="saveSettings()" data-i18n="saveSettings">Save Settings</button></div>
+<p class="muted" id="settingsMessage"></p>
+</div>
+</section>
+
+</main>
+</div>
+
+<script>
+/* TRANSLATION DATA */
+
+const translations = {
+en:{
+menu:"MAIN MENU",dashboard:"Dashboard",grading:"Onion Grading",voice:"Ask AgriVoice",alerts:"Alerts & Advisory",weather:"Weather Center",history:"Crop History",sensors:"Sensor Dashboard",account:"ACCOUNT",settings:"Settings",online:"AI Online",
+welcome:"Welcome to OnionSort 👋",welcomeText:"Your smart companion for onion grading, crop monitoring and farming assistance.",overview:"Farm Overview",graded:"Onions Graded",gradedDesc:"Sample grading records",cropHealth:"Crop Health",good:"Good",cropHealthDesc:"Sample crop status",temperature:"Temperature",temperatureDesc:"Demo weather reading",quickActions:"Quick Actions",gradeOnions:"Grade Onions",gradeDesc:"Upload an onion image to view a sample grading result.",startGrading:"Start Grading",talkAgriVoice:"Talk to AgriVoice",talkDesc:"Ask farming questions using your voice.",openVoice:"Open AgriVoice",liveCamera:"📷 Live Camera",cameraDesc:"Open your camera to capture an image.",openCamera:"Open Camera",onionGrading:"Onion Grading",uploadText:"Upload an onion image to view a sample grading report.",selectImage:"Select Image",analyze:"Analyze Image",askAgriVoice:"Ask AgriVoice",voiceInstructions:"Speak in your preferred language to ask a farming question.",chooseLanguage:"Choose Language",tapSpeak:"🎙️ Tap to Speak",voiceOutput:"Your voice input will appear here.",speakResponse:"🔊 Speak Response",clear:"Clear",cameraInstructions:"Start your camera to capture an image of your crop.",cameraReady:"Camera is ready",startCamera:"Start Camera",stopCamera:"Stop Camera",capture:"Capture Image",alertsAdvisory:"Alerts & Advisory",rainAlert:"Rainfall Advisory",rainText:"Sample advisory: Monitor field drainage during periods of heavy rainfall.",cropAlert:"Crop Monitoring",cropText:"Check onion leaves regularly for visible signs of disease or pest activity.",waterAlert:"Irrigation Reminder",waterText:"Check soil moisture before scheduling irrigation.",weatherCenter:"Weather Center",humidity:"Humidity",rainfall:"Rainfall",demoReading:"Demo reading",weatherNote:"These values are sample data. Connect a weather API for live information.",cropHistory:"Crop History",date:"Date",crop:"Crop",grade:"Grade",status:"Status",sample:"Sample",sensorDashboard:"Sensor Dashboard",soilTemperature:"Soil Temperature",soilMoisture:"Soil Moisture",sampleSensor:"Sample sensor reading",sensorStatus:"Sensor Status",demo:"Demo",sensorNote:"Connect IoT devices for live readings.",profileName:"Profile Name",preferredLanguage:"Preferred Language",saveSettings:"Save Settings",settingsSaved:"Settings saved successfully."
+},
+hi:{
+menu:"मुख्य मेनू",dashboard:"डैशबोर्ड",grading:"प्याज की ग्रेडिंग",voice:"एग्रीवॉइस से पूछें",alerts:"अलर्ट और सलाह",weather:"मौसम केंद्र",history:"फसल इतिहास",sensors:"सेंसर डैशबोर्ड",account:"खाता",settings:"सेटिंग्स",online:"एआई ऑनलाइन",
+welcome:"OnionSort में आपका स्वागत है 👋",welcomeText:"प्याज की ग्रेडिंग, फसल निगरानी और खेती में सहायता के लिए आपका स्मार्ट साथी।",overview:"खेत का विवरण",graded:"ग्रेड किए गए प्याज",gradedDesc:"नमूना ग्रेडिंग रिकॉर्ड",cropHealth:"फसल का स्वास्थ्य",good:"अच्छा",cropHealthDesc:"नमूना फसल स्थिति",temperature:"तापमान",temperatureDesc:"डेमो मौसम रीडिंग",quickActions:"त्वरित कार्य",gradeOnions:"प्याज की ग्रेडिंग करें",gradeDesc:"नमूना परिणाम देखने के लिए प्याज की तस्वीर अपलोड करें।",startGrading:"ग्रेडिंग शुरू करें",talkAgriVoice:"एग्रीवॉइस से बात करें",talkDesc:"अपनी आवाज़ से खेती के सवाल पूछें।",openVoice:"एग्रीवॉइस खोलें",liveCamera:"📷 लाइव कैमरा",cameraDesc:"तस्वीर लेने के लिए कैमरा खोलें।",openCamera:"कैमरा खोलें",onionGrading:"प्याज की ग्रेडिंग",uploadText:"नमूना ग्रेडिंग रिपोर्ट देखने के लिए प्याज की तस्वीर अपलोड करें।",selectImage:"तस्वीर चुनें",analyze:"तस्वीर का विश्लेषण करें",askAgriVoice:"एग्रीवॉइस से पूछें",voiceInstructions:"खेती से जुड़ा सवाल पूछने के लिए अपनी पसंदीदा भाषा में बोलें।",chooseLanguage:"भाषा चुनें",tapSpeak:"🎙️ बोलने के लिए दबाएं",voiceOutput:"आपकी आवाज़ यहां दिखाई देगी।",speakResponse:"🔊 जवाब सुनें",clear:"साफ़ करें",cameraInstructions:"अपनी फसल की तस्वीर लेने के लिए कैमरा शुरू करें।",cameraReady:"कैमरा तैयार है",startCamera:"कैमरा शुरू करें",stopCamera:"कैमरा बंद करें",capture:"तस्वीर लें",alertsAdvisory:"अलर्ट और सलाह",rainAlert:"बारिश संबंधी सलाह",rainText:"भारी बारिश के दौरान खेत में जल निकासी पर ध्यान दें।",cropAlert:"फसल निगरानी",cropText:"बीमारी या कीटों के लक्षणों के लिए प्याज की पत्तियों की नियमित जांच करें।",waterAlert:"सिंचाई अनुस्मारक",waterText:"सिंचाई से पहले मिट्टी की नमी जांचें।",weatherCenter:"मौसम केंद्र",humidity:"नमी",rainfall:"वर्षा",demoReading:"डेमो रीडिंग",weatherNote:"ये नमूना आंकड़े हैं। लाइव जानकारी के लिए मौसम API जोड़ें।",cropHistory:"फसल इतिहास",date:"तारीख",crop:"फसल",grade:"ग्रेड",status:"स्थिति",sample:"नमूना",sensorDashboard:"सेंसर डैशबोर्ड",soilTemperature:"मिट्टी का तापमान",soilMoisture:"मिट्टी की नमी",sampleSensor:"नमूना सेंसर रीडिंग",sensorStatus:"सेंसर स्थिति",demo:"डेमो",sensorNote:"लाइव रीडिंग के लिए IoT डिवाइस जोड़ें।",profileName:"प्रोफ़ाइल नाम",preferredLanguage:"पसंदीदा भाषा",saveSettings:"सेटिंग्स सहेजें",settingsSaved:"सेटिंग्स सफलतापूर्वक सहेजी गईं।"
+},
+mr:{
+menu:"मुख्य मेनू",dashboard:"डॅशबोर्ड",grading:"कांदा प्रतवारी",voice:"अ‍ॅग्रीव्हॉइसला विचारा",alerts:"सूचना आणि सल्ला",weather:"हवामान केंद्र",history:"पीक इतिहास",sensors:"सेन्सर डॅशबोर्ड",account:"खाते",settings:"सेटिंग्ज",online:"एआय ऑनलाइन",
+welcome:"OnionSort मध्ये आपले स्वागत आहे 👋",welcomeText:"कांदा प्रतवारी, पीक निरीक्षण आणि शेतीसाठी तुमचा स्मार्ट साथीदार.",overview:"शेतीचा आढावा",graded:"प्रतवारी केलेले कांदे",gradedDesc:"नमुना प्रतवारी नोंदी",cropHealth:"पिकाचे आरोग्य",good:"चांगले",cropHealthDesc:"नमुना पीक स्थिती",temperature:"तापमान",temperatureDesc:"डेमो हवामान नोंद",quickActions:"जलद कृती",gradeOnions:"कांदा प्रतवारी करा",gradeDesc:"नमुना निकाल पाहण्यासाठी कांद्याचा फोटो अपलोड करा.",startGrading:"प्रतवारी सुरू करा",talkAgriVoice:"अ‍ॅग्रीव्हॉइसशी बोला",talkDesc:"आवाजाद्वारे शेतीविषयक प्रश्न विचारा.",openVoice:"अ‍ॅग्रीव्हॉइस उघडा",liveCamera:"📷 लाइव्ह कॅमेरा",cameraDesc:"फोटो काढण्यासाठी कॅमेरा उघडा.",openCamera:"कॅमेरा उघडा",onionGrading:"कांदा प्रतवारी",uploadText:"नमुना प्रतवारी अहवाल पाहण्यासाठी कांद्याचा फोटो अपलोड करा.",selectImage:"फोटो निवडा",analyze:"फोटोचे विश्लेषण करा",askAgriVoice:"अ‍ॅग्रीव्हॉइसला विचारा",voiceInstructions:"शेतीविषयक प्रश्न विचारण्यासाठी तुमच्या आवडत्या भाषेत बोला.",chooseLanguage:"भाषा निवडा",tapSpeak:"🎙️ बोलण्यासाठी दाबा",voiceOutput:"तुमचा आवाज येथे दिसेल.",speakResponse:"🔊 उत्तर ऐका",clear:"पुसून टाका",cameraInstructions:"पिकाचा फोटो काढण्यासाठी कॅमेरा सुरू करा.",cameraReady:"कॅमेरा तयार आहे",startCamera:"कॅमेरा सुरू करा",stopCamera:"कॅमेरा बंद करा",capture:"फोटो काढा",alertsAdvisory:"सूचना आणि सल्ला",rainAlert:"पावसाबाबत सल्ला",rainText:"मुसळधार पावसात शेतातील पाण्याच्या निचऱ्याकडे लक्ष द्या.",cropAlert:"पीक निरीक्षण",cropText:"रोग किंवा किडींच्या लक्षणांसाठी कांद्याच्या पानांची नियमित तपासणी करा.",waterAlert:"सिंचन स्मरणपत्र",waterText:"सिंचनाचे नियोजन करण्यापूर्वी मातीतील ओलावा तपासा.",weatherCenter:"हवामान केंद्र",humidity:"आर्द्रता",rainfall:"पाऊस",demoReading:"डेमो नोंद",weatherNote:"ही नमुना माहिती आहे. थेट माहितीसाठी हवामान API जोडा.",cropHistory:"पीक इतिहास",date:"तारीख",crop:"पीक",grade:"प्रतवारी",status:"स्थिती",sample:"नमुना",sensorDashboard:"सेन्सर डॅशबोर्ड",soilTemperature:"मातीचे तापमान",soilMoisture:"मातीतील ओलावा",sampleSensor:"नमुना सेन्सर नोंद",sensorStatus:"सेन्सर स्थिती",demo:"डेमो",sensorNote:"थेट नोंदींसाठी IoT उपकरणे जोडा.",profileName:"प्रोफाइल नाव",preferredLanguage:"पसंतीची भाषा",saveSettings:"सेटिंग्ज जतन करा",settingsSaved:"सेटिंग्ज यशस्वीरित्या जतन झाल्या."
+},
+gu:{
+menu:"મુખ્ય મેનુ",dashboard:"ડેશબોર્ડ",grading:"ડુંગળીનું વર્ગીકરણ",voice:"એગ્રીવૉઇસને પૂછો",alerts:"ચેતવણીઓ અને સલાહ",weather:"હવામાન કેન્દ્ર",history:"પાકનો ઇતિહાસ",sensors:"સેન્સર ડેશબોર્ડ",account:"ખાતું",settings:"સેટિંગ્સ",online:"એઆઈ ઑનલાઇન",
+welcome:"OnionSort માં આપનું સ્વાગત છે 👋",welcomeText:"ડુંગળીના વર્ગીકરણ, પાકની દેખરેખ અને ખેતી માટે તમારો સ્માર્ટ સાથી.",overview:"ખેતરની માહિતી",graded:"વર્ગીકૃત ડુંગળી",gradedDesc:"નમૂના વર્ગીકરણ નોંધ",cropHealth:"પાકનું સ્વાસ્થ્ય",good:"સારું",cropHealthDesc:"નમૂના પાકની સ્થિતિ",temperature:"તાપમાન",temperatureDesc:"ડેમો હવામાન નોંધ",quickActions:"ઝડપી કાર્યો",gradeOnions:"ડુંગળીનું વર્ગીકરણ કરો",gradeDesc:"નમૂના પરિણામ માટે ડુંગળીનો ફોટો અપલોડ કરો.",startGrading:"વર્ગીકરણ શરૂ કરો",talkAgriVoice:"એગ્રીવૉઇસ સાથે વાત કરો",talkDesc:"તમારા અવાજથી ખેતીના પ્રશ્નો પૂછો.",openVoice:"એગ્રીવૉઇસ ખોલો",liveCamera:"📷 લાઇવ કેમેરા",cameraDesc:"ફોટો લેવા કેમેરા ખોલો.",openCamera:"કેમેરા ખોલો",onionGrading:"ડુંગળીનું વર્ગીકરણ",uploadText:"નમૂના અહેવાલ માટે ડુંગળીનો ફોટો અપલોડ કરો.",selectImage:"ફોટો પસંદ કરો",analyze:"ફોટાનું વિશ્લેષણ કરો",askAgriVoice:"એગ્રીવૉઇસને પૂછો",voiceInstructions:"ખેતીનો પ્રશ્ન પૂછવા તમારી પસંદગીની ભાષામાં બોલો.",chooseLanguage:"ભાષા પસંદ કરો",tapSpeak:"🎙️ બોલવા માટે દબાવો",voiceOutput:"તમારો અવાજ અહીં દેખાશે.",speakResponse:"🔊 જવાબ સાંભળો",clear:"સાફ કરો",cameraInstructions:"પાકનો ફોટો લેવા કેમેરા શરૂ કરો.",cameraReady:"કેમેરા તૈયાર છે",startCamera:"કેમેરા શરૂ કરો",stopCamera:"કેમેરા બંધ કરો",capture:"ફોટો લો",alertsAdvisory:"ચેતવણીઓ અને સલાહ",rainAlert:"વરસાદ અંગે સલાહ",rainText:"ભારે વરસાદ દરમિયાન ખેતરના પાણીના નિકાલ પર ધ્યાન આપો.",cropAlert:"પાકની દેખરેખ",cropText:"રોગ અથવા જીવાતના લક્ષણો માટે ડુંગળીના પાંદડાં તપાસો.",waterAlert:"સિંચાઈ યાદ અપાવવું",waterText:"સિંચાઈ પહેલાં જમીનની ભેજ તપાસો.",weatherCenter:"હવામાન કેન્દ્ર",humidity:"ભેજ",rainfall:"વરસાદ",demoReading:"ડેમો નોંધ",weatherNote:"આ નમૂના આંકડા છે. લાઇવ માહિતી માટે હવામાન API જોડો.",cropHistory:"પાકનો ઇતિહાસ",date:"તારીખ",crop:"પાક",grade:"વર્ગ",status:"સ્થિતિ",sample:"નમૂનો",sensorDashboard:"સેન્સર ડેશબોર્ડ",soilTemperature:"જમીનનું તાપમાન",soilMoisture:"જમીનની ભેજ",sampleSensor:"નમૂના સેન્સર નોંધ",sensorStatus:"સેન્સરની સ્થિતિ",demo:"ડેમો",sensorNote:"લાઇવ માહિતી માટે IoT ઉપકરણો જોડો.",profileName:"પ્રોફાઇલ નામ",preferredLanguage:"પસંદગીની ભાષા",saveSettings:"સેટિંગ્સ સાચવો",settingsSaved:"સેટિંગ્સ સફળતાપૂર્વક સાચવાઈ."
+},
+ta:{
+menu:"முக்கிய மெனு",dashboard:"டாஷ்போர்டு",grading:"வெங்காயத் தரப்படுத்தல்",voice:"AgriVoice-ஐ கேளுங்கள்",alerts:"எச்சரிக்கைகள் மற்றும் ஆலோசனை",weather:"வானிலை மையம்",history:"பயிர் வரலாறு",sensors:"சென்சார் டாஷ்போர்டு",account:"கணக்கு",settings:"அமைப்புகள்",online:"AI ஆன்லைன்",
+welcome:"OnionSort-க்கு வரவேற்கிறோம் 👋",welcomeText:"வெங்காயத் தரப்படுத்தல், பயிர் கண்காணிப்பு மற்றும் விவசாய உதவிக்கான உங்கள் ஸ்மார்ட் துணை.",overview:"பண்ணை விவரம்",graded:"தரப்படுத்தப்பட்ட வெங்காயங்கள்",gradedDesc:"மாதிரி தரப்படுத்தல் பதிவுகள்",cropHealth:"பயிர் ஆரோக்கியம்",good:"நன்று",cropHealthDesc:"மாதிரி பயிர் நிலை",temperature:"வெப்பநிலை",temperatureDesc:"மாதிரி வானிலை அளவீடு",quickActions:"விரைவு செயல்கள்",gradeOnions:"வெங்காயத்தைத் தரப்படுத்து",gradeDesc:"மாதிரி முடிவைக் காண வெங்காயப் படத்தைப் பதிவேற்றவும்.",startGrading:"தரப்படுத்தலைத் தொடங்கு",talkAgriVoice:"AgriVoice-உடன் பேசுங்கள்",talkDesc:"உங்கள் குரலில் விவசாயக் கேள்விகளைக் கேளுங்கள்.",openVoice:"AgriVoice-ஐ திறக்கவும்",liveCamera:"📷 நேரடி கேமரா",cameraDesc:"படம் எடுக்க கேமராவைத் திறக்கவும்.",openCamera:"கேமராவைத் திற",onionGrading:"வெங்காயத் தரப்படுத்தல்",uploadText:"மாதிரி அறிக்கையைப் பார்க்க வெங்காயப் படத்தைப் பதிவேற்றவும்.",selectImage:"படத்தைத் தேர்ந்தெடுக்கவும்",analyze:"படத்தைப் பகுப்பாய்வு செய்",askAgriVoice:"AgriVoice-ஐ கேளுங்கள்",voiceInstructions:"விவசாயக் கேள்வியைக் கேட்க விரும்பும் மொழியில் பேசுங்கள்.",chooseLanguage:"மொழியைத் தேர்ந்தெடுக்கவும்",tapSpeak:"🎙️ பேச அழுத்தவும்",voiceOutput:"உங்கள் குரல் இங்கே தோன்றும்.",speakResponse:"🔊 பதிலைக் கேளுங்கள்",clear:"அழி",cameraInstructions:"பயிரின் படத்தை எடுக்க கேமராவைத் தொடங்கவும்.",cameraReady:"கேமரா தயாராக உள்ளது",startCamera:"கேமராவைத் தொடங்கு",stopCamera:"கேமராவை நிறுத்து",capture:"படம் எடு",alertsAdvisory:"எச்சரிக்கைகள் மற்றும் ஆலோசனை",rainAlert:"மழை ஆலோசனை",rainText:"கனமழையின் போது வயலில் நீர் வடிகால் நிலையை கண்காணிக்கவும்.",cropAlert:"பயிர் கண்காணிப்பு",cropText:"நோய் அல்லது பூச்சி அறிகுறிகளுக்காக வெங்காய இலைகளைத் தொடர்ந்து சரிபார்க்கவும்.",waterAlert:"நீர்ப்பாசன நினைவூட்டல்",waterText:"நீர்ப்பாசனத்திற்கு முன் மண் ஈரப்பதத்தைச் சரிபார்க்கவும்.",weatherCenter:"வானிலை மையம்",humidity:"ஈரப்பதம்",rainfall:"மழைப்பொழிவு",demoReading:"மாதிரி அளவீடு",weatherNote:"இவை மாதிரி தரவுகள். நேரடி தகவலுக்கு வானிலை API-ஐ இணைக்கவும்.",cropHistory:"பயிர் வரலாறு",date:"தேதி",crop:"பயிர்",grade:"தரம்",status:"நிலை",sample:"மாதிரி",sensorDashboard:"சென்சார் டாஷ்போர்டு",soilTemperature:"மண் வெப்பநிலை",soilMoisture:"மண் ஈரப்பதம்",sampleSensor:"மாதிரி சென்சார் அளவீடு",sensorStatus:"சென்சார் நிலை",demo:"மாதிரி",sensorNote:"நேரடி அளவீடுகளுக்கு IoT சாதனங்களை இணைக்கவும்.",profileName:"சுயவிவரப் பெயர்",preferredLanguage:"விருப்பமான மொழி",saveSettings:"அமைப்புகளைச் சேமி",settingsSaved:"அமைப்புகள் வெற்றிகரமாகச் சேமிக்கப்பட்டன."
+},
+te:{
+menu:"ప్రధాన మెను",dashboard:"డాష్‌బోర్డ్",grading:"ఉల్లిపాయల గ్రేడింగ్",voice:"AgriVoice ని అడగండి",alerts:"హెచ్చరికలు మరియు సలహాలు",weather:"వాతావరణ కేంద్రం",history:"పంట చరిత్ర",sensors:"సెన్సార్ డాష్‌బోర్డ్",account:"ఖాతా",settings:"సెట్టింగ్‌లు",online:"AI ఆన్‌లైన్",
+welcome:"OnionSort కు స్వాగతం 👋",welcomeText:"ఉల్లిపాయల గ్రేడింగ్, పంట పర్యవేక్షణ మరియు వ్యవసాయ సహాయం కోసం మీ స్మార్ట్ సహచరుడు.",overview:"వ్యవసాయ వివరాలు",graded:"గ్రేడింగ్ చేసిన ఉల్లిపాయలు",gradedDesc:"నమూనా గ్రేడింగ్ రికార్డులు",cropHealth:"పంట ఆరోగ్యం",good:"బాగుంది",cropHealthDesc:"నమూనా పంట స్థితి",temperature:"ఉష్ణోగ్రత",temperatureDesc:"డెమో వాతావరణ కొలత",quickActions:"త్వరిత చర్యలు",gradeOnions:"ఉల్లిపాయలకు గ్రేడింగ్ చేయండి",gradeDesc:"నమూనా ఫలితాన్ని చూడటానికి ఉల్లిపాయ చిత్రాన్ని అప్‌లోడ్ చేయండి.",startGrading:"గ్రేడింగ్ ప్రారంభించండి",talkAgriVoice:"AgriVoice తో మాట్లాడండి",talkDesc:"మీ స్వరంతో వ్యవసాయ ప్రశ్నలు అడగండి.",openVoice:"AgriVoice తెరవండి",liveCamera:"📷 లైవ్ కెమెరా",cameraDesc:"చిత్రాన్ని తీయడానికి కెమెరాను తెరవండి.",openCamera:"కెమెరాను తెరవండి",onionGrading:"ఉల్లిపాయల గ్రేడింగ్",uploadText:"నమూనా నివేదికను చూడటానికి ఉల్లిపాయ చిత్రాన్ని అప్‌లోడ్ చేయండి.",selectImage:"చిత్రాన్ని ఎంచుకోండి",analyze:"చిత్రాన్ని విశ్లేషించండి",askAgriVoice:"AgriVoice ని అడగండి",voiceInstructions:"వ్యవసాయ ప్రశ్న అడగడానికి మీకు నచ్చిన భాషలో మాట్లాడండి.",chooseLanguage:"భాషను ఎంచుకోండి",tapSpeak:"🎙️ మాట్లాడటానికి నొక్కండి",voiceOutput:"మీ స్వరం ఇక్కడ కనిపిస్తుంది.",speakResponse:"🔊 సమాధానం వినండి",clear:"తొలగించండి",cameraInstructions:"మీ పంట చిత్రాన్ని తీయడానికి కెమెరాను ప్రారంభించండి.",cameraReady:"కెమెరా సిద్ధంగా ఉంది",startCamera:"కెమెరాను ప్రారంభించండి",stopCamera:"కెమెరాను ఆపండి",capture:"చిత్రాన్ని తీయండి",alertsAdvisory:"హెచ్చరికలు మరియు సలహాలు",rainAlert:"వర్షపు సలహా",rainText:"భారీ వర్షాల సమయంలో పొలంలోని నీటి పారుదలని గమనించండి.",cropAlert:"పంట పర్యవేక్షణ",cropText:"వ్యాధి లేదా పురుగుల లక్షణాల కోసం ఉల్లిపాయ ఆకులను క్రమం తప్పకుండా పరిశీలించండి.",waterAlert:"నీటిపారుదల గుర్తింపు",waterText:"నీటిపారుదలకి ముందు నేల తేమను తనిఖీ చేయండి.",weatherCenter:"వాతావరణ కేంద్రం",humidity:"తేమ",rainfall:"వర్షపాతం",demoReading:"డెమో కొలత",weatherNote:"ఇవి నమూనా విలువలు. ప్రత్యక్ష సమాచారం కోసం వాతావరణ API ని కనెక్ట్ చేయండి.",cropHistory:"పంట చరిత్ర",date:"తేదీ",crop:"పంట",grade:"గ్రేడ్",status:"స్థితి",sample:"నమూనా",sensorDashboard:"సెన్సార్ డాష్‌బోర్డ్",soilTemperature:"నేల ఉష్ణోగ్రత",soilMoisture:"నేల తేమ",sampleSensor:"నమూనా సెన్సార్ కొలత",sensorStatus:"సెన్సార్ స్థితి",demo:"డెమో",sensorNote:"ప్రత్యక్ష కొలతల కోసం IoT పరికరాలను కనెక్ట్ చేయండి.",profileName:"ప్రొఫైల్ పేరు",preferredLanguage:"ఇష్టమైన భాష",saveSettings:"సెట్టింగ్‌లను సేవ్ చేయండి",settingsSaved:"సెట్టింగ్‌లు విజయవంతంగా సేవ్ చేయబడ్డాయి."
+}
+};
+
+/* APP FUNCTIONS */
+
+let currentLanguage="en-IN";
+let currentResponse="";
+let cameraStream=null;
+
+function $(id){return document.getElementById(id)}
+function langKey(code){return code.split("-")[0]}
+function t(key){
+const words=translations[langKey(currentLanguage)]||translations.en;
+return words[key]||translations.en[key]||key;
+}
+
+function applyLanguage(code){
+currentLanguage=code;
+const key=langKey(code);
+const words=translations[key]||translations.en;
+
+document.querySelectorAll("[data-i18n]").forEach(function(el){
+const text=words[el.getAttribute("data-i18n")];
+if(text)el.textContent=text;
+});
+
+$("voiceLanguage").value=code;
+$("settingsLanguage").value=code;
+document.documentElement.lang=key;
+
+const active=document.querySelector(".page.active");
+if(active){
+const nav=document.querySelector('.nav-item[data-page="'+active.id+'"]');
+if(nav){
+$("pageTitle").textContent=nav.querySelector(".nav-text").textContent;
+}else{
+const titles={dashboard:"dashboard",grading:"onionGrading",voice:"askAgriVoice",alerts:"alertsAdvisory",weather:"weatherCenter",history:"cropHistory",sensors:"sensorDashboard",settings:"settings"};
+$("pageTitle").textContent=t(titles[active.id]);
+}
+}
+}
+
+function showPage(id){
+const page=$(id);
+if(!page)return;
+
+document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));
+
+page.classList.add("active");
+
+const nav=document.querySelector('.nav-item[data-page="'+id+'"]');
+if(nav){
+nav.classList.add("active");
+$("pageTitle").textContent=nav.querySelector(".nav-text").textContent;
+}else{
+const titles={dashboard:"dashboard",grading:"onionGrading",voice:"askAgriVoice",alerts:"alertsAdvisory",weather:"weatherCenter",history:"cropHistory",sensors:"sensorDashboard",settings:"settings"};
+$("pageTitle").textContent=t(titles[id]);
+}
+window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function openCameraPage(event){
+if(event)event.stopPropagation();
+showPage("voice");
+setTimeout(function(){
+$("cameraPanel").scrollIntoView({behavior:"smooth",block:"center"});
+startCamera();
+},250);
+}
+
+/* IMAGE GRADING */
+
+function previewOnion(input){
+const file=input.files[0];
+if(!file)return;
+const preview=$("onionPreview");
+if(preview.dataset.url)URL.revokeObjectURL(preview.dataset.url);
+const url=URL.createObjectURL(file);
+preview.dataset.url=url;
+preview.src=url;
+preview.style.display="block";
+$("gradingResult").style.display="none";
+}
+
+function gradeOnion(){
+if(!$("onionUpload").files[0]){
+alert(t("selectImage"));
+return;
+}
+const result=$("gradingResult");
+result.style.display="block";
+result.innerHTML="<strong>Sample Grading Result</strong><br>Grade: A<br>Quality: Good<br>Recommendation: Suitable for storage and market evaluation.<br><br><em>This is a demonstration result, not an actual AI prediction.</em>";
+$("gradedCount").textContent=Number($("gradedCount").textContent)+1;
+}
+
+/* SPEECH RECOGNITION */
+
+function startListening(){
+const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+const output=$("voiceOutput");
+
+if(!SpeechRecognition){
+output.textContent="Voice recognition is not supported in this browser. Please try Chrome.";
+return;
+}
+
+const recognition=new SpeechRecognition();
+recognition.lang=currentLanguage;
+recognition.interimResults=false;
+recognition.continuous=false;
+
+const circle=$("voiceCircle");
+const button=$("startVoice");
+
+circle.classList.add("listening");
+button.textContent="Listening...";
+
+recognition.onresult=function(event){
+const spoken=event.results[0][0].transcript;
+currentResponse=spoken;
+output.textContent="You said: "+spoken+"\n\nThis is a demo voice assistant. Connect an AI service to receive farming advice.";
+};
+
+recognition.onerror=function(){
+output.textContent="Could not recognize your voice. Please try again.";
+};
+
+recognition.onend=function(){
+circle.classList.remove("listening");
+button.textContent=t("tapSpeak");
+};
+
+recognition.start();
+}
+
+function speakResponse(){
+if(!("speechSynthesis" in window)){
+alert("Speech output is not supported in this browser.");
+return;
+}
+const utterance=new SpeechSynthesisUtterance(currentResponse||"Welcome to AgriVoice. Please ask your farming question.");
+utterance.lang=currentLanguage;
+speechSynthesis.cancel();
+speechSynthesis.speak(utterance);
+}
+
+function clearVoice(){
+currentResponse="";
+$("voiceOutput").textContent=t("voiceOutput");
+}
+
+/* LIVE CAMERA */
+
+async function startCamera(){
+const video=$("cameraVideo");
+const message=$("cameraMessage");
+
+try{
+if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+throw new Error("Camera unavailable");
+}
+
+if(cameraStream){
+cameraStream.getTracks().forEach(track=>track.stop());
+cameraStream=null;
+}
+
+cameraStream=await navigator.mediaDevices.getUserMedia({
+video:{facingMode:"environment"},
+audio:false
+});
+
+video.srcObject=cameraStream;
+video.style.display="block";
+$("cameraPlaceholder").style.display="none";
+message.textContent="Camera is running.";
+
+}catch(error){
+message.textContent="Unable to access camera. Allow camera permission and use localhost or HTTPS.";
+}
+}
+
+function stopCamera(){
+if(cameraStream){
+cameraStream.getTracks().forEach(track=>track.stop());
+cameraStream=null;
+}
+const video=$("cameraVideo");
+video.srcObject=null;
+video.style.display="none";
+$("cameraPlaceholder").style.display="block";
+$("cameraMessage").textContent="Camera stopped.";
+}
+
+function captureImage(){
+const video=$("cameraVideo");
+if(!cameraStream||video.readyState<2){
+$("cameraMessage").textContent="Start the camera before capturing an image.";
+return;
+}
+
+const canvas=$("cameraCanvas");
+canvas.width=video.videoWidth;
+canvas.height=video.videoHeight;
+canvas.getContext("2d").drawImage(video,0,0,canvas.width,canvas.height);
+
+const image=$("capturedImage");
+image.src=canvas.toDataURL("image/png");
+image.style.display="block";
+$("cameraMessage").textContent="Image captured successfully.";
+}
+
+/* SETTINGS */
+
+function saveSettings(){
+const name=$("profileName").value.trim()||"Farmer";
+const language=$("settingsLanguage").value;
+
+try{
+localStorage.setItem("onionSortName",name);
+localStorage.setItem("onionSortLanguage",language);
+}catch(error){}
+
+$("profileName").value=name;
+$(".avatar").textContent=name.charAt(0).toUpperCase();
+applyLanguage(language);
+$("settingsMessage").textContent=t("settingsSaved");
+}
+
+/* LOAD SAVED SETTINGS */
+
+try{
+const savedName=localStorage.getItem("onionSortName");
+const savedLanguage=localStorage.getItem("onionSortLanguage");
+
+if(savedName){
+$("profileName").value=savedName;
+$(".avatar").textContent=savedName.charAt(0).toUpperCase();
+}
+if(savedLanguage){
+currentLanguage=savedLanguage;
+}
+}catch(error){}
+
+applyLanguage(currentLanguage);
+</script>
+</body>
+</html>
